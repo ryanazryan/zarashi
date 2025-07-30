@@ -1,5 +1,4 @@
 # Azryan AI
-# Zarashi
 
 ![Version](https://img.shields.io/badge/version-v0.1.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
