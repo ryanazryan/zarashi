@@ -1,11 +1,11 @@
-# Zarashi AI 🗡️
+# Zarashi
 
 ![Version](https://img.shields.io/badge/version-v0.1.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Framework](https://img.shields.io/badge/framework-Next.js-black)
 ![Language](https://img.shields.io/badge/language-TypeScript-blue)
 
-Zarashi AI is an AI-powered storyteller web application designed to turn simple ideas into rich and engaging narratives. This project is built with Next.js and leverages the power of Large Language Models (LLMs) for limitless creativity.
+Zarashi is an AI-powered storyteller web application designed to turn simple ideas into rich and engaging narratives. This project is built with Next.js and leverages the power of Large Language Models (LLMs) for limitless creativity.
 
 ## ✨ Key Features
 
