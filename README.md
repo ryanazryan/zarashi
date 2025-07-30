@@ -62,5 +62,3 @@ Follow these steps to get Zarashi AI running on your local machine.
     ```
 
 5.  Open your browser and navigate to `http://localhost:3000`.
-
-## 📂 Project Structure
