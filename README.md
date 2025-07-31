@@ -1,11 +1,11 @@
-# Azryan AI
+# Zarashi
 
 ![Version](https://img.shields.io/badge/version-v0.1.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Framework](https://img.shields.io/badge/framework-Next.js-black)
 ![Language](https://img.shields.io/badge/language-TypeScript-blue)
 
-Azryan AI is an AI-powered storyteller web application designed to turn simple ideas into rich and engaging narratives. This project is built with Next.js and leverages the power of Large Language Models (LLMs) for limitless creativity.
+Zarashi is an AI-powered storyteller web application designed to turn simple ideas into rich and engaging narratives. This project is built with Next.js and leverages the power of Large Language Models (LLMs) for limitless creativity.
 
 ## ✨ Key Features
 
@@ -28,7 +28,7 @@ Azryan AI is an AI-powered storyteller web application designed to turn simple i
 
 ## ⚙️ Getting Started
 
-Follow these steps to get Azryan AI running on your local machine.
+Follow these steps to get Zarashi running on your local machine.
 
 ### Prerequisites
 
@@ -40,8 +40,8 @@ Follow these steps to get Azryan AI running on your local machine.
 
 1.  **Clone this repository:**
     ```bash
-    git clone [https://github.com/YOUR_USERNAME/azryan-ai.git](https://github.com/YOUR_USERNAME/azryan-ai.git)
-    cd azryan-ai
+    git clone [https://github.com/YOUR_USERNAME/zarashi.git](https://github.com/YOUR_USERNAME/zarashi.git)
+    cd zarashi
     ```
 
 2.  **Install project dependencies:**

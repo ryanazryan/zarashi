@@ -5,7 +5,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Azryan AI", 
+  title: "Zarashi", 
   description: "AI Story Teller powered by Azryan",
 };
 

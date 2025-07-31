@@ -2,7 +2,7 @@
 
 import React, { useState, FormEvent } from 'react';
 
-// Ikon untuk tombol kirim (SVG sederhana)
+// Icon for the send button (simple SVG)
 const SendIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24" fill="none" xmlns="http://www.w3.org/2000/svg">
     <path d="M7 11L12 6L17 11M12 18V7" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"/>
@@ -26,15 +26,13 @@ export default function HomePage() {
     try {
       const response = await fetch('/api/generate-story', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Terjadi kesalahan saat menghasilkan cerita.');
+        throw new Error(errorData.error || `Server error: ${response.statusText}`);
       }
 
       const data = await response.json();
@@ -47,13 +45,11 @@ export default function HomePage() {
   };
 
   return (
-    // Latar belakang utama: Putih di light mode, Hitam di dark mode
     <div className="flex flex-col h-screen bg-white dark:bg-black text-black dark:text-white">
       <main className="flex-grow overflow-y-auto p-4 md:p-8">
         <div className="max-w-3xl mx-auto h-full">
           {isLoading && (
             <div className="flex justify-center items-center h-full">
-              {/* Spinner dengan warna hitam/putih */}
               <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-black dark:border-white"></div>
             </div>
           )}
@@ -66,7 +62,6 @@ export default function HomePage() {
           )}
 
           {story && !isLoading && (
-            // Tipografi adaptif untuk cerita
             <article className="prose dark:prose-invert prose-lg max-w-none">
               <p className="whitespace-pre-wrap leading-relaxed">{story}</p>
             </article>
@@ -74,24 +69,21 @@ export default function HomePage() {
 
           {!story && !isLoading && !errorMessage && (
             <div className="flex flex-col items-center justify-center h-full text-center">
-              {/* Judul dengan animasi gradien */}
               <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-200% text-transparent bg-clip-text animate-gradient-flow">
-                Azryan AI
+                Zarashi
               </h1>
-              {/* Menggunakan opacity untuk membuat teks abu-abu dari warna dasar hitam/putih */}
-              <p className="mt-2 text-black/60 dark:text-white/60">Mari kita ciptakan sebuah kisah. Apa yang ada di pikiranmu?</p>
+              <p className="mt-2 text-black/60 dark:text-white/60">Let's create a story. What's on your mind?</p>
             </div>
           )}
         </div>
       </main>
 
-      {/* Footer dengan latar belakang utama dan border pemisah */}
       <footer className="p-4 bg-white dark:bg-black border-t border-black/10 dark:border-white/10">
         <div className="max-w-3xl mx-auto">
           <form onSubmit={handleSubmit} className="flex items-center bg-white dark:bg-black rounded-xl p-2 shadow-sm border border-black/20 dark:border-white/20">
             <textarea
-              className="w-full bg-transparent text-black transition duration-150 dark:text-white placeholder-black/40 dark:placeholder-white/40 focus:outline-none resize-none px-3 py-2"
-              placeholder="Ketik ide cerita Anda di sini..."
+              className="w-full bg-transparent text-black dark:text-white placeholder-black/40 dark:placeholder-white/40 focus:outline-none resize-none px-3 py-2"
+              placeholder="Type your story idea here..."
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={(e) => {
