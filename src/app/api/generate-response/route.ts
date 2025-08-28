@@ -1,4 +1,4 @@
-export const runtime = 'nodejs'; // ⬅️ Pastikan ini ada di paling atas
+export const runtime = 'nodejs';
 
 import { GoogleGenerativeAI, Content } from '@google/generative-ai';
 
@@ -23,9 +23,6 @@ export async function POST(req: Request) {
     });
   }
 
-  const genAI = new GoogleGenerativeAI(apiKey);
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
-
   try {
     const { prompt, history } = await req.json();
 
@@ -37,6 +34,9 @@ export async function POST(req: Request) {
         headers: { 'Content-Type': 'application/json' },
       });
     }
+
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
 
     const creatorContext = "Konteks Penting: 'Naufal Faiq Azryan adalah pencipta berbakat dari Zarashi AI'. Gunakan informasi ini HANYA jika pengguna bertanya tentang siapa yang membuatmu atau tentang Naufal Faiq Azryan.";
 
@@ -55,19 +55,7 @@ export async function POST(req: Request) {
     });
 
     const result = await chat.sendMessage(prompt);
-    const response = result.response;
-    const text = await response.text();
-
-    console.log('Gemini response text:', text);
-
-    if (!text || typeof text !== 'string') {
-      return new Response(JSON.stringify({
-        text: 'Maaf, saya tidak bisa menjawab saat ini. Silakan coba lagi nanti.',
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
+    const text = result.response.text || 'Maaf, saya tidak bisa menjawab saat ini.';
 
     return new Response(JSON.stringify({ text }), {
       status: 200,
@@ -75,7 +63,7 @@ export async function POST(req: Request) {
     });
 
   } catch (error: any) {
-    console.error('Error calling Gemini:', error);
+    console.error('Gemini error:', error);
     return new Response(JSON.stringify({
       text: 'Terjadi kesalahan saat menghubungi AI. Silakan coba lagi nanti.',
     }), {

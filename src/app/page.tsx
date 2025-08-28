@@ -17,7 +17,7 @@ const SendIcon = () => (
   </svg>
 );
 
-export default function HomePage() {
+export default function Page() {
   const [prompt, setPrompt] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -51,11 +51,6 @@ export default function HomePage() {
         data = JSON.parse(raw);
       } catch (err) {
         throw new Error('Invalid JSON response from server.');
-      }
-
-      if (!response.ok) {
-        const errorMessage = data?.text || raw || 'An unknown error occurred.';
-        throw new Error(errorMessage);
       }
 
       const aiMessage: Message = {
