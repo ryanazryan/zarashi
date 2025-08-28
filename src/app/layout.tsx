@@ -5,8 +5,11 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Zarashi", 
-  description: "AI Story Teller powered by Azryan",
+  title: "Zarashi",
+  description: "AI powered by Azryan",
+  icons: {
+    icon: '/logo.png',
+  },
 };
 
 export default function RootLayout({

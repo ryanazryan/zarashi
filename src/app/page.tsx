@@ -1,89 +1,105 @@
 'use client';
 
-import React, { useState, FormEvent } from 'react';
+import React, { useState, FormEvent, useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import TextareaAutosize from 'react-textarea-autosize';
 
-// Icon for the send button (simple SVG)
+interface Message {
+  id: number;
+  sender: 'user' | 'ai';
+  content: string;
+}
+
 const SendIcon = () => (
-  <svg width="24" height="24" viewBox="0 0 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M7 11L12 6L17 11M12 18V7" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"/>
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/1800/svg">
+    <path d="M2 21L23 12L2 3V10L17 12L2 14V21Z"/>
   </svg>
 );
 
 export default function HomePage() {
   const [prompt, setPrompt] = useState('');
-  const [story, setStory] = useState('');
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isLoading]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!prompt || isLoading) return;
 
+    const userMessage: Message = { id: Date.now(), sender: 'user', content: prompt };
+    setMessages(prev => [...prev, userMessage]);
+    setPrompt('');
     setIsLoading(true);
-    setStory('');
-    setErrorMessage('');
 
     try {
-      const response = await fetch('/api/generate-story', {
+      const response = await fetch('/api/generate-response', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt: userMessage.content }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || `Server error: ${response.statusText}`);
+        throw new Error((await response.json()).error || 'An unknown error occurred.');
       }
 
       const data = await response.json();
-      setStory(data.story);
+      const aiMessage: Message = { id: Date.now() + 1, sender: 'ai', content: data.text };
+      setMessages(prev => [...prev, aiMessage]);
+
     } catch (error: any) {
-      setErrorMessage(error.message);
+      const errorMessage: Message = { id: Date.now() + 1, sender: 'ai', content: `Error: ${error.message}` };
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col h-screen bg-white dark:bg-black text-black dark:text-white">
-      <main className="flex-grow overflow-y-auto p-4 md:p-8">
-        <div className="max-w-3xl mx-auto h-full">
+    <div className="flex flex-col min-h-screen">
+      {messages.length === 0 && !isLoading && (
+        <header className="text-center pt-10">
+          <h1 className="text-5xl font-bold">Zarashi</h1>
+          <p className="mt-4 text-gray-500 dark:text-white/60">Ask me anything...</p>
+        </header>
+      )}
+
+      <main className="flex-grow w-full max-w-3xl mx-auto p-4 md:p-8 pb-32">
+        <div className="space-y-8">
+          {messages.map((msg) => (
+            <div key={msg.id} className="flex flex-col">
+              <div className="font-bold text-lg mb-2">
+                {msg.sender === 'user' ? 'You' : 'Zarashi'}
+              </div>
+              <div className="text-gray-800 dark:text-gray-300">
+                <article className="prose dark:prose-invert prose-lg max-w-none">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {msg.content}
+                  </ReactMarkdown>
+                </article>
+              </div>
+            </div>
+          ))}
           {isLoading && (
-            <div className="flex justify-center items-center h-full">
-              <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-black dark:border-white"></div>
+            <div className="flex flex-col">
+              <div className="font-bold text-lg mb-2">Zarashi</div>
+               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-500"></div>
             </div>
           )}
-
-          {errorMessage && (
-            <div className="bg-red-100 border border-red-400 text-red-700 dark:bg-red-900/50 dark:border-red-700 dark:text-red-300 px-4 py-3 rounded-lg">
-              <p className="font-bold">Error:</p>
-              <p>{errorMessage}</p>
-            </div>
-          )}
-
-          {story && !isLoading && (
-            <article className="prose dark:prose-invert prose-lg max-w-none">
-              <p className="whitespace-pre-wrap leading-relaxed">{story}</p>
-            </article>
-          )}
-
-          {!story && !isLoading && !errorMessage && (
-            <div className="flex flex-col items-center justify-center h-full text-center">
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-200% text-transparent bg-clip-text animate-gradient-flow">
-                Zarashi
-              </h1>
-              <p className="mt-2 text-black/60 dark:text-white/60">Let's create a story. What's on your mind?</p>
-            </div>
-          )}
+          <div ref={messagesEndRef} />
         </div>
       </main>
 
-      <footer className="p-4 bg-white dark:bg-black border-t border-black/10 dark:border-white/10">
+      <footer className="w-full p-4 bg-white dark:bg-[#0D0D0D] sticky bottom-0 border-t border-gray-200 dark:border-transparent">
         <div className="max-w-3xl mx-auto">
-          <form onSubmit={handleSubmit} className="flex items-center bg-white dark:bg-black rounded-xl p-2 shadow-sm border border-black/20 dark:border-white/20">
-            <textarea
-              className="w-full bg-transparent text-black dark:text-white placeholder-black/40 dark:placeholder-white/40 focus:outline-none resize-none px-3 py-2"
-              placeholder="Type your story idea here..."
+          <form onSubmit={handleSubmit} className="relative flex items-end">
+            <TextareaAutosize
+              className="w-full bg-gray-100 dark:bg-[#1F1F1F] text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-white/50 focus:outline-none focus:ring-1 focus:ring-gray-400 dark:focus:ring-gray-600 resize-none px-5 py-3 pr-16 rounded-2xl border border-gray-300 dark:border-gray-700 shadow-lg"
+              placeholder="Type your question here..."
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               onKeyDown={(e) => {
@@ -93,11 +109,12 @@ export default function HomePage() {
                 }
               }}
               rows={1}
+              maxRows={5}
               disabled={isLoading}
             />
             <button
               type="submit"
-              className="bg-black hover:bg-zinc-800 dark:bg-white dark:hover:bg-zinc-200 disabled:bg-black/20 dark:disabled:bg-white/20 text-white dark:text-black rounded-lg p-2 ml-2 transition-colors"
+              className="absolute right-3 bottom-1.5 bg-[#323537] disabled:bg-gray-300 dark:disabled:bg-[#1F1F1F] text-white disabled:text-gray-400 dark:disabled:text-gray-500 rounded-full p-2.5 transition-colors"
               disabled={isLoading || !prompt}
             >
               <SendIcon />
