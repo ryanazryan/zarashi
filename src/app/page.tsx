@@ -112,7 +112,6 @@ export default function Page() {
     <div className={`flex flex-col min-h-screen ${isDarkMode ? 'dark' : ''} bg-light-bg dark:bg-dark-bg text-gray-900 dark:text-gray-100 transition-colors duration-500`}>
       <header className="relative z-10 w-full p-4 flex justify-end items-center bg-transparent">
         <div className="flex items-center p-2 rounded-full bg-gray-200 dark:bg-gray-800 shadow-md">
-          <span className="font-semibold text-gray-800 dark:text-gray-200 ml-2">Zarashi</span>
           <div
             className="relative w-14 h-8 flex items-center bg-gray-300 dark:bg-gray-700 rounded-full mx-3 cursor-pointer"
             onClick={() => setIsDarkMode(!isDarkMode)}
