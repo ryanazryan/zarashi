@@ -1,3 +1,4 @@
+export const runtime = 'nodejs'; 
 import { GoogleGenerativeAI, Content } from '@google/generative-ai';
 import { NextResponse } from 'next/server';
 
