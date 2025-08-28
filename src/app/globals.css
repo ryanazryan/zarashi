@@ -1,39 +1,41 @@
 @import "tailwindcss";
 
-
-:root {
-  --background: #ffffff;
-  --foreground: rgb(31 41 55);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0D0D0D; 
-    --foreground: #E5E5E5; 
-  }
-}
-
-body {
-  background-color: var(--background);
-  color: var(--foreground);
-}
-
-.prose {
-  line-height: 1.75;
-}
-
-.prose p {
-  margin-bottom: 1em;
-}
-
-
 @layer base {
-  @keyframes blink {
-    50% {
-      opacity: 0;
-    }
+  :root {
+    --color-light-bg-start: #EAEFF6;
+    --color-light-bg-end: #F6F8FC;
+
+    --color-dark-bg-start: #1B1E2B;
+    --color-dark-bg-end: #1D2132;
   }
-  .animate-blink {
-    animation: blink 1s step-end infinite;
+
+  body {
+    @apply antialiased;
+    background-size: 200% 200%;
+    animation: gradient-flow 15s ease-in-out infinite;
+  }
+
+  body:not(.dark) {
+    background-image: linear-gradient(to bottom right, var(--color-light-bg-start), var(--color-light-bg-end));
+  }
+
+  .dark body {
+    background-image: linear-gradient(to bottom right, var(--color-dark-bg-start), var(--color-dark-bg-end));
+  }
+
+  .prose {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+  .prose-sm {
+    font-size: 0.9rem;
+  }
+
+  .dark .prose-invert {
+    color: #e5e7eb;
+  }
+
+  .prose-invert h1, .prose-invert h2, .prose-invert h3, .prose-invert h4, .prose-invert h5, .prose-invert h6 {
+    color: #f9fafb;
   }
 }

@@ -1,6 +1,17 @@
 export const runtime = 'nodejs';
 
 import { GoogleGenerativeAI, Content } from '@google/generative-ai';
+import { GoogleAIFileManager } from "@google/generative-ai/server";
+
+// Fungsi untuk mengubah stream dari Google Generative AI menjadi format yang bisa dibaca
+async function* streamGoogle(stream: AsyncGenerator<any>) {
+  for await (const chunk of stream) {
+    const text = chunk.text();
+    if (text) {
+      yield text;
+    }
+  }
+}
 
 export async function POST(req: Request) {
   const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
@@ -45,29 +56,28 @@ export async function POST(req: Request) {
       ],
     });
 
-    const result = await chat.sendMessage(prompt);
-    const text = await result.response.text();
+    const result = await chat.sendMessageStream(prompt);
+    const stream = streamGoogle(result.stream);
 
-    if (!text || typeof text !== 'string') {
-      return new Response(JSON.stringify({
-        text: 'Maaf, saya tidak bisa menjawab saat ini. Silakan coba lagi nanti.',
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
+    const readableStream = new ReadableStream({
+      async start(controller) {
+        for await (const chunk of stream) {
+          controller.enqueue(new TextEncoder().encode(chunk));
+        }
+        controller.close();
+      },
+    });
 
-    return new Response(JSON.stringify({ text }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
+    return new Response(readableStream, {
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
     });
 
   } catch (error: any) {
     console.error('Gemini error:', error);
     return new Response(JSON.stringify({
-      text: 'Terjadi kesalahan saat menghubungi AI. Silakan coba lagi nanti.',
+      text: 'Maaf, sepertinya respons terlalu panjang atau terjadi kendala. Silakan coba ajukan pertanyaan lain yang lebih sederhana.',
     }), {
-      status: 200,
+      status: 200, 
       headers: { 'Content-Type': 'application/json' },
     });
   }

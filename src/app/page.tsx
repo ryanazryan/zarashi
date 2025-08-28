@@ -12,20 +12,52 @@ interface Message {
 }
 
 const SendIcon = () => (
-  <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-    <path d="M2 21L23 12L2 3V10L17 12L2 14V21Z" />
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
   </svg>
+);
+
+const SunIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="5"></circle>
+    <line x1="12" y1="1" x2="12" y2="3"></line>
+    <line x1="12" y1="21" x2="12" y2="23"></line>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+    <line x1="1" y1="12" x2="3" y2="12"></line>
+    <line x1="21" y1="12" x2="23" y2="12"></line>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+  </svg>
+);
+
+const MoonIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+);
+
+const ZarashiAvatar = () => (
+  <div className="w-8 h-8 rounded-full flex items-center justify-center bg-[#5B5E77] text-white text-sm font-semibold">
+    Z
+  </div>
 );
 
 export default function Page() {
   const [prompt, setPrompt] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isLoading]);
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [messages, isLoading, isDarkMode]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -36,6 +68,10 @@ export default function Page() {
     setPrompt('');
     setIsLoading(true);
 
+    const aiMessageId = Date.now() + 1;
+    const aiMessage: Message = { id: aiMessageId, sender: 'ai', content: '' };
+    setMessages(prev => [...prev, aiMessage]);
+
     try {
       const response = await fetch('/api/generate-response', {
         method: 'POST',
@@ -43,54 +79,76 @@ export default function Page() {
         body: JSON.stringify({ prompt: userMessage.content }),
       });
 
-      const raw = await response.text();
-      console.log('Raw response from server:', raw);
-
-      let data;
-      try {
-        data = JSON.parse(raw);
-      } catch (err) {
-        throw new Error('Invalid JSON response from server.');
+      if (!response.body) {
+        throw new Error("No response body");
       }
 
-      const aiMessage: Message = {
-        id: Date.now() + 1,
-        sender: 'ai',
-        content: data.text || 'Maaf, tidak ada jawaban yang tersedia.',
-      };
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-      setMessages(prev => [...prev, aiMessage]);
-
+        const chunk = decoder.decode(value, { stream: true });
+        setMessages(prev =>
+          prev.map(msg =>
+            msg.id === aiMessageId ? { ...msg, content: msg.content + chunk } : msg
+          )
+        );
+      }
     } catch (error: any) {
-      const errorMessage: Message = {
-        id: Date.now() + 1,
-        sender: 'ai',
-        content: `Error: ${error.message}`,
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev =>
+        prev.map(msg =>
+          msg.id === aiMessageId ? { ...msg, content: `Error: ${error.message}` } : msg
+        )
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className={`flex flex-col min-h-screen ${isDarkMode ? 'dark' : ''} bg-light-bg dark:bg-dark-bg text-gray-900 dark:text-gray-100 transition-colors duration-500`}>
+      <header className="relative z-10 w-full p-4 flex justify-end items-center bg-transparent">
+        <div className="flex items-center p-2 rounded-full bg-gray-200 dark:bg-gray-800 shadow-md">
+          <span className="font-semibold text-gray-800 dark:text-gray-200 ml-2">Zarashi</span>
+          <div
+            className="relative w-14 h-8 flex items-center bg-gray-300 dark:bg-gray-700 rounded-full mx-3 cursor-pointer"
+            onClick={() => setIsDarkMode(!isDarkMode)}
+          >
+            <div
+              className={`absolute left-1 bg-white dark:bg-blue-500 w-6 h-6 rounded-full shadow-md transform transition-transform duration-300 ${isDarkMode ? 'translate-x-6' : 'translate-x-0'}`}
+            ></div>
+          </div>
+          <div className="mr-2 text-gray-800 dark:text-gray-200">
+            {isDarkMode ? <MoonIcon /> : <SunIcon />}
+          </div>
+        </div>
+      </header>
+
       {messages.length === 0 && !isLoading && (
-        <header className="text-center pt-10">
-          <h1 className="text-5xl font-bold">Zarashi</h1>
-          <p className="mt-4 text-gray-500 dark:text-white/60">Ask me anything...</p>
-        </header>
+        <div className="relative z-10 flex-grow flex flex-col items-center justify-center text-center px-4">
+          <h1 className="text-4xl sm:text-5xl font-bold text-gray-500 ">Zarashi</h1>
+          <p className="mt-4 text-gray-600 dark:text-gray-400 text-lg">Ask me anything...</p>
+        </div>
       )}
 
-      <main className="flex-grow w-full max-w-3xl mx-auto p-4 md:p-8 pb-32">
-        <div className="space-y-8">
+      <main className="relative z-10 flex-grow w-full max-w-2xl mx-auto p-4 md:p-8 pb-32">
+        <div className="space-y-6">
           {messages.map((msg) => (
-            <div key={msg.id} className="flex flex-col">
-              <div className="font-bold text-lg mb-2">
-                {msg.sender === 'user' ? 'You' : 'Zarashi'}
-              </div>
-              <div className="text-gray-800 dark:text-gray-300">
-                <article className="prose dark:prose-invert prose-lg max-w-none">
+            <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} items-start`}>
+              {msg.sender === 'ai' && (
+                <div className="flex-shrink-0 mr-3">
+                  <ZarashiAvatar />
+                </div>
+              )}
+              <div className={`max-w-[70%] p-3 rounded-lg shadow-md ${
+                msg.sender === 'user'
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-white text-gray-900 dark:bg-gray-700 dark:text-gray-100'
+              }`}>
+                <article className="prose prose-sm dark:prose-invert">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {msg.content}
                   </ReactMarkdown>
@@ -98,43 +156,38 @@ export default function Page() {
               </div>
             </div>
           ))}
-          {isLoading && (
-            <div className="flex flex-col">
-              <div className="font-bold text-lg mb-2">Zarashi</div>
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-500"></div>
-            </div>
-          )}
           <div ref={messagesEndRef} />
         </div>
       </main>
 
-      <footer className="w-full p-4 bg-white dark:bg-[#0D0D0D] sticky bottom-0 border-t border-gray-200 dark:border-transparent">
-        <div className="max-w-3xl mx-auto">
-          <form onSubmit={handleSubmit} className="relative flex items-end">
-            <TextareaAutosize
-              className="w-full bg-gray-100 dark:bg-[#1F1F1F] text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-white/50 focus:outline-none focus:ring-1 focus:ring-gray-400 dark:focus:ring-gray-600 resize-none px-5 py-3 pr-16 rounded-2xl border border-gray-300 dark:border-gray-700 shadow-lg"
-              placeholder="Type your question here..."
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSubmit(e);
-                }
-              }}
-              rows={1}
-              maxRows={5}
-              disabled={isLoading}
-            />
-            <button
-              type="submit"
-              className="absolute right-3 bottom-1.5 bg-[#323537] disabled:bg-gray-300 dark:disabled:bg-[#1F1F1F] text-white disabled:text-gray-400 dark:disabled:text-gray-500 rounded-full p-2.5 transition-colors"
-              disabled={isLoading || !prompt}
-            >
-              <SendIcon />
-            </button>
-          </form>
+      <footer className="z-10 w-full p-4 bg-transparent backdrop-blur-sm sticky bottom-0">
+        <div className="max-w-2xl mx-auto flex items-center bg-white dark:bg-gray-800 rounded-full px-5 py-3 shadow-lg border border-gray-300 dark:border-gray-700">
+          <TextareaAutosize
+            className="flex-grow bg-transparent text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none resize-none pr-3"
+            placeholder="Ask me anything..."
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSubmit(e);
+              }
+            }}
+            rows={1}
+            maxRows={4}
+            disabled={isLoading}
+          />
+          <button
+            type="submit"
+            onClick={handleSubmit}
+            className="p-2 rounded-full bg-blue-500 text-white disabled:bg-gray-400 disabled:text-gray-200 hover:bg-blue-600 transition-colors"
+            disabled={isLoading || !prompt}
+            aria-label="Send"
+          >
+            <SendIcon />
+          </button>
         </div>
+        <p className="text-center text-xs text-gray-500 dark:text-gray-400 mt-2">Powered by Azryan</p>
       </footer>
     </div>
   );
