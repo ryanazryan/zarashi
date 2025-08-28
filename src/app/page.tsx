@@ -45,8 +45,8 @@ export default function HomePage() {
 
       const raw = await response.text();
       console.log('Raw response from server:', raw);
-      let data;
 
+      let data;
       try {
         data = JSON.parse(raw);
       } catch (err) {
@@ -54,7 +54,7 @@ export default function HomePage() {
       }
 
       if (!response.ok) {
-        const errorMessage = data?.error || raw || 'An unknown error occurred.';
+        const errorMessage = data?.text || raw || 'An unknown error occurred.';
         throw new Error(errorMessage);
       }
 
@@ -63,7 +63,6 @@ export default function HomePage() {
         sender: 'ai',
         content: data.text || 'Maaf, tidak ada jawaban yang tersedia.',
       };
-
 
       setMessages(prev => [...prev, aiMessage]);
 

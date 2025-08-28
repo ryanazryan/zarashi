@@ -1,6 +1,6 @@
-export const runtime = 'nodejs'; 
+export const runtime = 'nodejs'; // ⬅️ Pastikan ini ada di paling atas
+
 import { GoogleGenerativeAI, Content } from '@google/generative-ai';
-import { NextResponse } from 'next/server';
 
 interface MessagePart {
   text: string;
@@ -15,10 +15,12 @@ export async function POST(req: Request) {
   const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
 
   if (!apiKey) {
-    return NextResponse.json(
-      { text: 'Maaf, konfigurasi server belum lengkap. Coba lagi nanti.' },
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({
+      text: 'Maaf, konfigurasi server belum lengkap. Coba lagi nanti.',
+    }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
@@ -28,7 +30,12 @@ export async function POST(req: Request) {
     const { prompt, history } = await req.json();
 
     if (!prompt) {
-      return NextResponse.json({ text: 'Pertanyaan tidak boleh kosong.' }, { status: 400 });
+      return new Response(JSON.stringify({
+        text: 'Pertanyaan tidak boleh kosong.',
+      }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     const creatorContext = "Konteks Penting: 'Naufal Faiq Azryan adalah pencipta berbakat dari Zarashi AI'. Gunakan informasi ini HANYA jika pengguna bertanya tentang siapa yang membuatmu atau tentang Naufal Faiq Azryan.";
@@ -54,17 +61,26 @@ export async function POST(req: Request) {
     console.log('Gemini response text:', text);
 
     if (!text || typeof text !== 'string') {
-      return NextResponse.json({
+      return new Response(JSON.stringify({
         text: 'Maaf, saya tidak bisa menjawab saat ini. Silakan coba lagi nanti.',
-      }, { status: 200 });
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
-    return NextResponse.json({ text });
+    return new Response(JSON.stringify({ text }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
 
   } catch (error: any) {
-    console.error('Error calling Google Gemini API:', error);
-    return NextResponse.json({
+    console.error('Error calling Gemini:', error);
+    return new Response(JSON.stringify({
       text: 'Terjadi kesalahan saat menghubungi AI. Silakan coba lagi nanti.',
-    }, { status: 200 });
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }
