@@ -25,3 +25,15 @@ body {
 .prose p {
   margin-bottom: 1em;
 }
+
+
+@layer base {
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+  .animate-blink {
+    animation: blink 1s step-end infinite;
+  }
+}

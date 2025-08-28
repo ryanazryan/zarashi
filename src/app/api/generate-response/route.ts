@@ -2,15 +2,6 @@ export const runtime = 'nodejs';
 
 import { GoogleGenerativeAI, Content } from '@google/generative-ai';
 
-interface MessagePart {
-  text: string;
-}
-
-interface HistoryMessage {
-  role: 'user' | 'model';
-  parts: MessagePart[];
-}
-
 export async function POST(req: Request) {
   const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
 
@@ -51,11 +42,20 @@ export async function POST(req: Request) {
           parts: [{ text: "Tentu, saya Zarashi AI. Siap membantu." }],
         },
         ...(history || []),
-      ] as Content[],
+      ],
     });
 
     const result = await chat.sendMessage(prompt);
-    const text = result.response.text || 'Maaf, saya tidak bisa menjawab saat ini.';
+    const text = await result.response.text();
+
+    if (!text || typeof text !== 'string') {
+      return new Response(JSON.stringify({
+        text: 'Maaf, saya tidak bisa menjawab saat ini. Silakan coba lagi nanti.',
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
 
     return new Response(JSON.stringify({ text }), {
       status: 200,
