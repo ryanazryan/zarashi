@@ -53,6 +53,14 @@ export async function POST(req: Request) {
     const result = await chat.sendMessage(prompt);
     const response = result.response;
     const text = await response.text();
+
+    if (!text || typeof text !== "string") {
+      return NextResponse.json(
+        { error: "Empty response from Zarashi." },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({ text });
   } catch (error: any) {
     console.error("Error calling Google Gemini API:", error);

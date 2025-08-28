@@ -12,7 +12,7 @@ interface Message {
 }
 
 const SendIcon = () => (
-  <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/1800/svg">
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
     <path d="M2 21L23 12L2 3V10L17 12L2 14V21Z"/>
   </svg>
 );
@@ -43,16 +43,34 @@ export default function HomePage() {
         body: JSON.stringify({ prompt: userMessage.content }),
       });
 
-      if (!response.ok) {
-        throw new Error((await response.json()).error || 'An unknown error occurred.');
+      const raw = await response.text(); // ambil mentah dulu
+      let data;
+
+      try {
+        data = JSON.parse(raw); // coba parse JSON
+      } catch (err) {
+        throw new Error('Invalid JSON response from server.');
       }
 
-      const data = await response.json();
-      const aiMessage: Message = { id: Date.now() + 1, sender: 'ai', content: data.text };
+      if (!response.ok) {
+        const errorMessage = data?.error || raw || 'An unknown error occurred.';
+        throw new Error(errorMessage);
+      }
+
+      const aiMessage: Message = {
+        id: Date.now() + 1,
+        sender: 'ai',
+        content: data.text || 'No response received.',
+      };
+
       setMessages(prev => [...prev, aiMessage]);
 
     } catch (error: any) {
-      const errorMessage: Message = { id: Date.now() + 1, sender: 'ai', content: `Error: ${error.message}` };
+      const errorMessage: Message = {
+        id: Date.now() + 1,
+        sender: 'ai',
+        content: `Error: ${error.message}`,
+      };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
@@ -87,7 +105,7 @@ export default function HomePage() {
           {isLoading && (
             <div className="flex flex-col">
               <div className="font-bold text-lg mb-2">Zarashi</div>
-               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-500"></div>
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-500"></div>
             </div>
           )}
           <div ref={messagesEndRef} />
