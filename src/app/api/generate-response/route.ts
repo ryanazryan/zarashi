@@ -3,7 +3,6 @@ export const runtime = 'nodejs';
 import { GoogleGenerativeAI, Content } from '@google/generative-ai';
 import { GoogleAIFileManager } from "@google/generative-ai/server";
 
-// Fungsi untuk mengubah stream dari Google Generative AI menjadi format yang bisa dibaca
 async function* streamGoogle(stream: AsyncGenerator<any>) {
   for await (const chunk of stream) {
     const text = chunk.text();

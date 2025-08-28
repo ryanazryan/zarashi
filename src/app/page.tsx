@@ -38,9 +38,11 @@ const MoonIcon = () => (
 );
 
 const ZarashiAvatar = () => (
-  <div className="w-8 h-8 rounded-full flex items-center justify-center bg-[#5B5E77] text-white text-sm font-semibold">
-    Z
-  </div>
+  <img
+    src="/logo.png"
+    alt="Zarashi Logo"
+    className="w-8 h-8 rounded-full"
+  />
 );
 
 export default function Page() {
@@ -85,7 +87,7 @@ export default function Page() {
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -128,7 +130,7 @@ export default function Page() {
 
       {messages.length === 0 && !isLoading && (
         <div className="relative z-10 flex-grow flex flex-col items-center justify-center text-center px-4">
-          <h1 className="text-4xl sm:text-5xl font-bold text-gray-500 ">Zarashi</h1>
+          <h1 className="text-4xl sm:text-5xl font-bold text-gray-500">Zarashi</h1>
           <p className="mt-4 text-gray-600 dark:text-gray-400 text-lg">Ask me anything...</p>
         </div>
       )}
@@ -142,11 +144,10 @@ export default function Page() {
                   <ZarashiAvatar />
                 </div>
               )}
-              <div className={`max-w-[70%] p-3 rounded-lg shadow-md ${
-                msg.sender === 'user'
+              <div className={`max-w-[70%] p-3 rounded-lg shadow-md ${msg.sender === 'user'
                   ? 'bg-blue-500 text-white'
                   : 'bg-white text-gray-900 dark:bg-gray-700 dark:text-gray-100'
-              }`}>
+                }`}>
                 <article className="prose prose-sm dark:prose-invert">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {msg.content}
