@@ -24,7 +24,6 @@ export async function POST(req: Request) {
   const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
 
   try {
-    // Sekarang kita menerima prompt dan history
     const { prompt, history } = await req.json();
 
     if (!prompt) {
