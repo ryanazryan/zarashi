@@ -13,7 +13,7 @@ interface Message {
 
 const SendIcon = () => (
   <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-    <path d="M2 21L23 12L2 3V10L17 12L2 14V21Z"/>
+    <path d="M2 21L23 12L2 3V10L17 12L2 14V21Z" />
   </svg>
 );
 
@@ -43,11 +43,12 @@ export default function HomePage() {
         body: JSON.stringify({ prompt: userMessage.content }),
       });
 
-      const raw = await response.text(); // ambil mentah dulu
+      const raw = await response.text();
+      console.log('Raw response from server:', raw);
       let data;
 
       try {
-        data = JSON.parse(raw); // coba parse JSON
+        data = JSON.parse(raw);
       } catch (err) {
         throw new Error('Invalid JSON response from server.');
       }
@@ -60,8 +61,9 @@ export default function HomePage() {
       const aiMessage: Message = {
         id: Date.now() + 1,
         sender: 'ai',
-        content: data.text || 'No response received.',
+        content: data.text || 'Maaf, tidak ada jawaban yang tersedia.',
       };
+
 
       setMessages(prev => [...prev, aiMessage]);
 
