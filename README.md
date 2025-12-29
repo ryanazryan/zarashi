@@ -5,13 +5,13 @@
 ![Framework](https://img.shields.io/badge/framework-Next.js-black)
 ![Language](https://img.shields.io/badge/language-TypeScript-blue)
 
-Zarashi is an AI-powered storyteller web application designed to turn simple ideas into rich and engaging narratives. This project is built with Next.js and leverages the power of Large Language Models (LLMs) for limitless creativity.
+Zarashi is a web-based AI chatbot powered by the Google Gemini API, designed to provide intelligent, text-based conversational interactions through a simple and modern web interface.
 
-## ✨ Key Features
-
--   **Intuitive Story Generator**: Simply enter an idea or a prompt, and let the AI weave a unique story for you.
--   **Modern UI**: A clean, responsive, and user-friendly interface built with Next.js and Tailwind CSS.
--   **Integrated Backend**: Utilizes Next.js API Routes for seamless communication between the frontend and the AI service.
+## 🔑 Key Features
+- Text-based AI chatbot powered by Google Gemini API  
+- Context-aware conversational responses  
+- Clean and responsive web interface  
+- Real-time AI response generation  
 
 ### 🚀 Planned Features (Roadmap)
 -   [ ] **Text-to-Speech Narrator**: An option to listen to the generated stories.
